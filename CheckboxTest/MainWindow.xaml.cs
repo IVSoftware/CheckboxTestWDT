@@ -37,25 +37,41 @@ namespace CheckboxTest
             };
             Content.KeyUp += async(sender, e) =>
             {
-                if (!_isShowing)    // avoid reentry (Delete key while already open)
+                if (Equals(e.Key, VirtualKey.Delete))
                 {
-                    _isShowing = true;
-                    _wdtOpening.StartOrRestart();
-                    if (Equals(e.Key, VirtualKey.Delete))
+                    if (_doNotAsk)
                     {
-                        _wdtOpening.StartOrRestart();
-                        if(Equals(await DeleteConfirmationDialog.ShowAsync(), ContentDialogResult.Primary))
-                        {
-                            DoDeleteOperation();
-                        }
+                        await DoDeleteOperation();
                     }
-                    _isShowing = false;
+                    else
+                    {
+                        if (!_isShowing)    // avoid reentry (Delete key while already open)
+                        {
+                            _isShowing = true;
+                            _wdtOpening.StartOrRestart();
+                            _wdtOpening.StartOrRestart();
+                            if (Equals(await DeleteConfirmationDialog.ShowAsync(), ContentDialogResult.Primary))
+                            {
+                                await DoDeleteOperation();
+                            }
+                        }
+                        _doNotAsk = DeleteDontAskCheckbox.IsChecked == true;
+                        _isShowing = false;
+                    }
                 }
             };
         }
         bool _isShowing;
-        private void DoDeleteOperation()
+        bool _doNotAsk;
+        private async Task DoDeleteOperation()
         {
+            await new ContentDialog
+            {
+                Title = "Deleted",
+                Content = "The item has been successfully deleted.",
+                CloseButtonText = "OK",
+                XamlRoot = this.Content.XamlRoot // Required in WinUI3
+            }.ShowAsync();
         }
         public Button CancelButton
         {
