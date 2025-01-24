@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CheckboxTest (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "CheckboxTest (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
